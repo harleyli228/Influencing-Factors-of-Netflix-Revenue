@@ -1,0 +1,331 @@
+---
+title: "Netflix_Revenue_Forecast"
+author: "Yuquan Li"
+date: "12/6/2021"
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Variable Introduction
+
+```{r}
+read.csv("Netflix_variables.csv")
+data<-read.csv("Netflix_variables.csv")
+names(data)
+attach(data)
+```
+
+
+## Summary and Visualization
+
+```{r}
+#install.packages("corrr")
+#install.packages("lubridate")
+#install.packages("corrplot")
+
+library(corrr)
+library(lubridate)
+library(corrplot)
+
+#Correlation
+newdata<-subset(data, select = -c(AmazonSub,DisneySub,HuluSub) )
+corr<-cor(newdata[,-1])
+plot(newdata)
+
+cor_numVar<-cor(corr, use="pairwise.complete.obs")
+corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt", tl.cex = 0.7,cl.cex = .7, number.cex=.7)
+
+#Histograms
+hist(MKTcost)
+hist(TechDevelopment)
+hist(GeneralAdministrative)
+hist(CapEx)
+hist(Revenue)
+
+#Line chart
+library(ggplot2)
+library(lubridate)
+
+## The following objects are masked from netflix (pos = 4):
+## 
+##     AmazonSub, ContentInvest, CPI, CSI, DisneySub,
+##     GeneralAdministrative, HuluSub, MKTcost, NetflixSub, RemoteRate,
+##     Revenue, TechDevelopment, Time, Unemployment
+
+Year <- year(seq(from = as.Date('2007-01-01'), to = as.Date('2021-07-01'), by = 'year'))
+Subscriber <- c(20,40,60,80,100,120,140,160,180,200,220,240,260,280,300)
+df1 <- data.frame(Year = Time, Subsriber = NetflixSub)
+
+p1<-ggplot(data = df1, mapping = aes(x = factor(Year), y = Subsriber, group = 1)) + 
+  geom_line() + 
+  xlab('Year')+
+  geom_point(size = 2, shape = 21,fill = "black")+
+   geom_smooth(alpha=0.2) 
+p1
+
+Year <- year(seq(from = as.Date('2007-01-01'), to = as.Date('2021-07-01'), by = 'year'))
+Subsriber <- c(20,40,60,80,100,120,140,160,180,200,220,240,260,280,300)
+df2 <- data.frame(Year = Time, Subscriber = HuluSub)
+
+p2<-ggplot(data = df2, mapping = aes(x = factor(Year), y = Subscriber, group = 1)) + 
+  geom_line() + 
+  xlab('Year')+
+  geom_point(size = 2, shape = 21,fill = "blue")
+p2
+
+Year <- year(seq(from = as.Date('2007-01-01'), to = as.Date('2021-07-01'), by = 'year'))
+Subsriber <- c(20,40,60,80,100,120,140,160,180,200,220,240,260,280,300)
+df3 <- data.frame(Year = Time, Subscriber = DisneySub)
+
+p3<-ggplot(data = df3, mapping = aes(x = factor(Year), y = Subscriber, group = 1)) + 
+  geom_line() + 
+  xlab('Year')+
+  geom_point(size = 2, shape = 21,fill = "blue")
+p3
+
+Year <- year(seq(from = as.Date('2007-01-01'), to = as.Date('2021-07-01'), by = 'year'))
+Subsriber <- c(20,40,60,80,100,120,140,160,180,200,220,240,260,280,300)
+df4 <- data.frame(Year = Time, Subscriber = AmazonSub)
+
+p4<-ggplot(data = df4, mapping = aes(x = factor(Year), y = Subscriber, group = 1)) + 
+  geom_line(alpha=0.2,fill="red") + 
+  xlab('Year')+
+  geom_point(size = 2, shape = 21,fill = "blue")
+p4
+
+#Visualization on remote rate
+library(ggplot2)
+colnames(data)
+
+ggplot(data = data,mapping = aes(
+    x = RemoteRate,
+    y = NetflixSub))+ 
+  geom_point (size = 1, shape = 21,fill = "grey")+
+  geom_line(size = 0.5, shape = 20,fill = "black")+
+   geom_smooth(alpha=0.2)
+
+p5 <- ggplot(data = data,
+  mapping = aes(
+    x = Revenue,
+    y = NetflixSub))+
+  geom_point(alpha = 0.4) + 
+  labs(
+    title = "Relation between Revenue and Netflix subscription",
+    subtitle = "2007-2021",
+    tag = "Plot",
+    caption = "data resource:netflix financial report ",
+    x = "Revenue(unit:million dollars)",
+    y = "Number of subscriber (unit:million)"
+  )+
+  geom_smooth(alpha=0.2) 
+p5
+
+p6 <- ggplot(data = data,
+  mapping = aes(
+    x = Unemployment,
+    y = NetflixSub))+
+  geom_point(alpha = 0.4) + 
+  labs(
+    title = "Relation between unemployment rate and Netflix subscription",
+    subtitle = "2007-2021",
+    tag = "Plot",
+    caption = "data resource:netflix financial report ",
+    x = "Unemployment rate(%)",
+    y = "Number of subscriber (unit:million)"
+  )+
+  geom_smooth(alpha=0.2) 
+p6  
+
+
+p7 <- ggplot(data = data,
+  mapping = aes(
+    x = CPI,
+    y = NetflixSub))+
+  geom_point(alpha = 0.4) + 
+  labs(
+    title = "Relation between CPI and Netflix subscription",
+    subtitle = "2007-2021",
+    tag = "Plot",
+    caption = "data resource:netflix financial report ",
+    x = "CPI",
+    y = "Number of subscriber (unit:million)"
+  )+
+  geom_smooth(alpha=0.2) 
+p7
+
+#Expenses on marketing cost, technology development, general administrative and content invest.
+p8 <- ggplot(data = data,
+  mapping = aes(x = Time, y = Revenue))
+p8 + geom_col() + 
+  labs(y = "Netflix Revenue")+
+    geom_smooth(alpha=0.2,color="red")
+
+p9 <- ggplot(data = data,
+  mapping = aes(x = Time, y = MKTcost))
+p9 + geom_col() + 
+  labs(y = "Netflix MKTcost")+
+  geom_smooth(alpha=0.2,color="red")
+
+p10 <- ggplot(data = data,
+  mapping = aes(x = Time, y = TechDevelopment))
+p10 + geom_col() + 
+  labs(y = "Netflix Tech Development")+
+  geom_smooth(alpha=0.2,color="red")
+
+p11 <- ggplot(data = data,
+  mapping = aes(x = Time, y = GeneralAdministrative))
+p11 + geom_col() + 
+  labs(y = "Netflix general administrative expenditure")+
+  geom_smooth(alpha=0.2,color="red")
+
+p12 <- ggplot(data = data,
+  mapping = aes(x = Time, 
+                y = CapEx))
+p12 + geom_col() + 
+  labs(y = "Netflix content inest expenditure")+
+  geom_smooth(alpha=0.2,color="red")
+
+p13 <- ggplot(data = data,
+  mapping = aes(
+    x = CapEx,
+    y = Revenue))+
+  geom_point(alpha = 0.4) + 
+  labs(
+    title = "Relation between Content expenditure and Netflix revenue",
+    subtitle = "2007-2021",
+    tag = "Plot",
+    caption = "data resource:netflix financial report ",
+    x = "content investment(unit:unite dollars)",
+    y = "revenue (unit:million dollars)"
+  )+
+  geom_smooth(alpha=0.2) 
+p13
+
+
+
+```
+
+
+
+## We select data from 2007Q1 to 2020Q4 as training set, 2021Q1-Q3 as testing set
+
+```{r}
+train=Time<2021
+test=!train
+
+training_data=data[train,-c(1)]
+testing_data=data[test,-c(1)]
+testing_y=Revenue[test]
+```
+
+
+## Building model
+
+```{r}
+#Model 1: All variables model (excluding subscribers)
+Netflix.mlm1<-lm(Revenue~RemoteRate+MKTcost+TechDevelopment+GeneralAdministrative+CapEx+CPI+CSI+Unemployment, data=training_data)
+summary(Netflix.mlm1)
+
+#Model 2: Selected significant variable model
+Netflix.mlm2<-lm(Revenue~MKTcost+TechDevelopment+GeneralAdministrative+CPI, data=training_data)
+summary(Netflix.mlm2)
+
+
+#Model 3: Netflix internal spending  model
+Netflix.mlm3<-lm(Revenue~MKTcost+CapEx+TechDevelopment+GeneralAdministrative,data=training_data)
+summary(Netflix.mlm3)
+
+#Model 4: Macro economics model
+Netflix.mlm4<-lm(Revenue~RemoteRate+CPI+CSI+Unemployment, data=training_data)
+summary(Netflix.mlm4)
+
+
+#Optimal model by subset selection
+
+#install.packages("leaps")
+library(leaps)
+
+Netflix.sub<-regsubsets(Revenue~RemoteRate+MKTcost+TechDevelopment+GeneralAdministrative+CapEx+CPI+CSI+Unemployment, data = training_data) 
+s.reg<-summary(Netflix.sub)
+
+names(s.reg)
+
+maxR2 <- which.max(s.reg$adjr2) #which line has the maximum ajdR2, how many input variables
+plot(s.reg$adjr2, type="o", xlab="Number of variables", ylab="AjdR2")
+points(maxR2,s.reg$adjr2[maxR2], col="red", pch=20, cex=2) 
+coef(Netflix.sub,maxR2)
+
+opt.cp <- which.min(s.reg$cp)
+plot(s.reg$cp, type="o", xlab="Number of variables", ylab="cp")
+points(opt.cp,s.reg$cp[opt.cp], col="red", pch=20, cex=2) 
+
+coef(Netflix.sub,opt.cp)
+
+#Model 5: Best cp model
+Netflix.mlm5<-lm(Revenue~MKTcost+TechDevelopment+GeneralAdministrative+CPI+CSI+Unemployment, data=training_data)
+summary(Netflix.mlm5)
+
+#Model 6: Best ajdR2 model
+Netflix.mlm6<-lm(Revenue~MKTcost+TechDevelopment+GeneralAdministrative+CapEx+CPI+CSI+Unemployment, data=training_data)
+summary(Netflix.mlm6)
+```
+
+
+## VIF test
+
+```{r}
+library(car)
+vif(Netflix.mlm1)
+vif(Netflix.mlm2)
+vif(Netflix.mlm3)
+vif(Netflix.mlm4)
+vif(Netflix.mlm5)
+
+cor(data[,c(2,4,5,6,7,8,9,10)])
+pairs(data[,c(2,4,5,6,7,8,9,10)])
+
+```
+
+
+## Prediction
+
+```{r}
+pred1 = predict(Netflix.mlm1,testing_data)
+Revenue.pred1 = predict(Netflix.mlm1,testing_data,se.fit=T, interval = "prediction")
+pred2 = predict(Netflix.mlm2,testing_data)
+Revenue.pred2 = predict(Netflix.mlm2,testing_data,se.fit=T, interval = "prediction")
+pred3 = predict(Netflix.mlm3,testing_data)
+Revenue.pred3 = predict(Netflix.mlm3,testing_data,se.fit=T, interval = "prediction")
+pred4 = predict(Netflix.mlm4,testing_data)
+Revenue.pred4 = predict(Netflix.mlm3,testing_data,se.fit=T, interval = "prediction")
+pred5 = predict(Netflix.mlm5,testing_data)
+Revenue.pred5 = predict(Netflix.mlm5,testing_data,se.fit=T, interval = "prediction")
+pred6 = predict(Netflix.mlm6,testing_data)
+Revenue.pred6 = predict(Netflix.mlm6,testing_data,se.fit=T, interval = "prediction")
+
+mean((pred1 - testing_y)^2)
+mean((pred2 - testing_y)^2)
+mean((pred3 - testing_y)^2)
+mean((pred4 - testing_y)^2)
+mean((pred5 - testing_y)^2)
+mean((pred6 - testing_y)^2)
+
+```
+
+
+## Assess the assumptions of the models
+
+```{r}
+par(mfrow = c(2, 2))
+plot(Netflix.mlm2)
+plot(Netflix.mlm5)
+
+```
